@@ -23,10 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.musicplayerapp.data.data_models.Data
-import com.example.musicplayerapp.player.service.MusicPlayerState
 import com.example.musicplayerapp.ui.components.LoadImageFromUrl
+import com.example.musicplayerapp.ui.components.MediaPlayerController
 import com.example.musicplayerapp.ui.components.PlayerIconItem
 import com.example.musicplayerapp.ui.components.ShimmerListItem
+import com.example.musicplayerapp.ui.components.SongItem
 import com.example.musicplayerapp.ui.components.TextViewBold
 import com.example.musicplayerapp.ui.components.TextViewSemiBold
 import com.example.musicplayerapp.ui.music.MusicViewModel
@@ -77,60 +78,9 @@ fun ForYouScreen(
     }
 }
 
-@Composable
-fun SongItem(
-    song: Data,
-    onSongItemClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp, horizontal = 20.dp)
-            .clickable {
-                onSongItemClick()
-            }
-    ) {
-        LoadImageFromUrl(url = AppConstants.BASE_ASSETS_URL + song.cover)
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            TextViewBold(
-                text = song.name
-            )
-            TextViewSemiBold(
-                text = song.artist
-            )
-        }
-    }
-}
 
 
-@Composable
-fun MediaPlayerController(
-    currentPlayingAudio: Data,
-    isAudioPlaying: Boolean,
-    onStart: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .background(Brown),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Spacer(modifier = Modifier.width(18.dp))
-        LoadImageFromUrl(url = AppConstants.BASE_ASSETS_URL + currentPlayingAudio.cover)
-        Spacer(modifier = Modifier.width(16.dp))
-        TextViewBold(text = currentPlayingAudio.name)
-        Spacer(modifier = Modifier.weight(1f))
-        PlayerIconItem(
-            icon = if (isAudioPlaying) Icons.Default.Pause
-            else Icons.Default.PlayArrow
-        ) {
-            onStart()
-        }
-        Spacer(modifier = Modifier.width(20.dp))
-    }
-}
+
+
 
 

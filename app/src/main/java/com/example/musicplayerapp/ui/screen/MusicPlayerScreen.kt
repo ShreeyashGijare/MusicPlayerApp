@@ -115,7 +115,8 @@ fun MusicPlayerScreen(
         }
     }
 
-    var percentReached = currentPosition.longValue.toFloat() / if (totalDuration.longValue > 0) totalDuration.longValue else 0
+    var percentReached =
+        currentPosition.longValue.toFloat() / if (totalDuration.longValue > 0) totalDuration.longValue else 0
     if (percentReached.isNaN()) {
         percentReached = 0f
     }
@@ -128,7 +129,7 @@ fun MusicPlayerScreen(
         mutableIntStateOf(viewModel.currentPlayingIndex)
     }
 
-    LaunchedEffect(exoPlayer.currentMediaItemIndex){
+    LaunchedEffect(exoPlayer.currentMediaItemIndex) {
         playingIndex = exoPlayer.currentMediaItemIndex
         pagerState.animateScrollToPage(playingIndex, animationSpec = tween(500))
     }

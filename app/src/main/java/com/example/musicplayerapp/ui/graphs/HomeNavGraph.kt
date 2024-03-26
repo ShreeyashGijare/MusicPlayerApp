@@ -50,7 +50,20 @@ fun HomeNavGraph(
             )
         }
         composable(Screen.TopTracks.route) {
-            TopTracksScreen(viewModel)
+            TopTracksScreen(
+                viewModel,
+                contentPaddingValues = contentPaddingValues,
+                isAudioPlaying = isAudioPlaying,
+                currentPlayingAudio = currentPlayingAudio,
+                isLoading = isLoading,
+                onSongItemClick = {
+                    onSongItemClick(it)
+                    navController.navigate(Graph.MUSIC_PLAYER)
+                },
+                onStart = {
+                    onStart()
+                }
+            )
         }
         musicPlayerScreenGraph(viewModel, exoPlayer)
     }
