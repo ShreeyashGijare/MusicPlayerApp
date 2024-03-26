@@ -2,6 +2,7 @@ package com.example.musicplayerapp.ui.screen
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -9,6 +10,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.with
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,12 +35,21 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
@@ -67,6 +78,7 @@ fun MusicPlayerScreen(
     LaunchedEffect(pagerState.currentPage) {
         viewModel.currentPlayingIndex = pagerState.currentPage
         viewModel.onUIEvents(UIEvents.SelectedAudioChange(pagerState.currentPage))
+        pagerState.animateScrollToPage(viewModel.currentPlayingIndex, animationSpec = tween(500))
     }
 
     LaunchedEffect(Unit) {
@@ -76,6 +88,41 @@ fun MusicPlayerScreen(
         }
     }
     exoPlayer.prepare()
+
+    var playing by remember{
+        mutableStateOf(false)
+    }
+
+    var currentPosition by remember {
+        mutableLongStateOf(0)
+    }
+
+    var totalDuration by remember {
+        mutableLongStateOf(0)
+    }
+
+    val progressSize = remember {
+        mutableStateOf(IntSize(0, 0))
+    }
+
+    LaunchedEffect(exoPlayer.currentPosition) {
+        currentPosition = exoPlayer.currentPosition
+    }
+
+    LaunchedEffect(exoPlayer.duration) {
+        if (exoPlayer.duration > 0) {
+            totalDuration = exoPlayer.duration
+        }
+    }
+
+    LaunchedEffect(exoPlayer.isPlaying) {
+        playing = exoPlayer.isPlaying
+    }
+
+    var percentReached = currentPosition.toFloat() / if (totalDuration > 0) totalDuration else 0
+    if (percentReached.isNaN()) {
+        percentReached = 0f
+    }
 
     Box(
         modifier = Modifier
@@ -139,17 +186,29 @@ fun MusicPlayerScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
+                    .height(6.dp)
                     .padding(horizontal = 20.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF595453)),
+                    .background(Color(0xFF595453))
+                    .onGloballyPositioned {
+                        progressSize.value = it.size
+                    }
+                    .pointerInput(Unit) {
+                        detectTapGestures {
+                            val xPos = it.x
+                            val whereIClicked =
+                                (xPos.toLong() * totalDuration) / progressSize.value.width.toLong()
+//                            viewModel.onUIEvents(UIEvents.SeekTo(whereIClicked.toFloat()))
+                            exoPlayer.seekTo(whereIClicked)
+                        }
+                    },
                 contentAlignment = Alignment.CenterStart
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(fraction = .5f)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .fillMaxWidth(fraction = if (viewModel.isPlaying) percentReached else 0f)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(4.dp))
                         .background(Color.White)
                 )
             }
@@ -161,8 +220,8 @@ fun MusicPlayerScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextViewNormal(text = "00.00")
-                TextViewNormal(text = "00.00")
+                TextViewNormal(text = convertLongToText(currentPosition))
+                TextViewNormal(text = convertLongToText(totalDuration))
             }
             Spacer(modifier = Modifier.height(48.dp))
             Row(
@@ -173,7 +232,7 @@ fun MusicPlayerScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 PlayerIconItem(
-                    modifier = Modifier.size(60.dp),
+                    modifier = Modifier.size(40.dp),
                     icon = Icons.Filled.FastRewind,
                     color = Color.Transparent,
                     iconTint = Color.White
@@ -181,14 +240,14 @@ fun MusicPlayerScreen(
                     viewModel.onUIEvents(UIEvents.Backward)
                 }
                 PlayerIconItem(
-                    modifier = Modifier.size(80.dp),
+                    modifier = Modifier.size(60.dp).padding(10.dp),
                     icon = if (viewModel.isPlaying) Icons.Default.Pause
                     else Icons.Default.PlayArrow
                 ) {
                     viewModel.onUIEvents(UIEvents.PlayPause)
                 }
                 PlayerIconItem(
-                    modifier = Modifier.size(60.dp),
+                    modifier = Modifier.size(40.dp),
                     icon = Icons.Filled.FastForward,
                     color = Color.Transparent,
                     iconTint = Color.White
@@ -199,3 +258,22 @@ fun MusicPlayerScreen(
         }
     }
 }
+
+fun convertLongToText(long: Long): String {
+    val sec = long / 1000
+    val minutes = sec / 60
+    val seconds = sec % 60
+
+    val minutesString = if (minutes < 10) {
+        "0${minutes}"
+    } else {
+        minutes.toString()
+    }
+    val secondsString = if (seconds < 10) {
+        "0${seconds}"
+    } else {
+        seconds.toString()
+    }
+    return "$minutesString:$secondsString"
+}
+

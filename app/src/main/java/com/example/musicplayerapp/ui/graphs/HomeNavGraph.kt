@@ -56,7 +56,6 @@ fun HomeNavGraph(
     }
 }
 
-
 fun NavGraphBuilder.musicPlayerScreenGraph(
     viewModel: MusicViewModel,
     exoPlayer: ExoPlayer

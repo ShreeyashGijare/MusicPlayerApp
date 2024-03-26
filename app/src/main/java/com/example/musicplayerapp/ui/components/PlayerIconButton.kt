@@ -25,7 +25,7 @@ fun PlayerIconItem(
 ) {
     Surface(
         shape = CircleShape,
-        modifier = modifier
+        modifier = Modifier
             .clip(CircleShape)
             .clickable {
                 onClick()
@@ -33,7 +33,7 @@ fun PlayerIconItem(
         color = color
     ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .padding(4.dp),
             contentAlignment = Alignment.Center,
         ) {
