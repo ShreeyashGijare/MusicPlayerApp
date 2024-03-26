@@ -62,9 +62,9 @@ class MusicViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState.Initial)
     val uiState: StateFlow<UIState> = _uiState
 
-    init {
+    /*init {
         loadAudioData()
-    }
+    }*/
 
     init {
         viewModelScope.launch {
