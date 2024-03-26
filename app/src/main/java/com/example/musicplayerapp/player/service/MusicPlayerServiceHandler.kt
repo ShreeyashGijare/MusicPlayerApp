@@ -93,6 +93,7 @@ class MusicPlayerServiceHandler @Inject constructor(
     private suspend fun playOrPause() {
         if (exoPlayer.isPlaying) {
             exoPlayer.pause()
+            _audioState.value = MusicPlayerState.Playing(isPlaying = false)
             stopProgressUpdate()
         } else {
             exoPlayer.play()

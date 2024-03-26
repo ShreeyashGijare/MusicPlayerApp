@@ -1,13 +1,12 @@
 package com.example.musicplayerapp.ui.screen
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -64,7 +63,7 @@ import com.example.musicplayerapp.ui.music.UIEvents
 import com.example.musicplayerapp.utils.AppConstants
 import kotlin.math.absoluteValue
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MusicPlayerScreen(
     viewModel: MusicViewModel,
@@ -81,6 +80,14 @@ fun MusicPlayerScreen(
         pagerState.animateScrollToPage(viewModel.currentPlayingIndex, animationSpec = tween(500))
     }
 
+    var isPlaying by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(exoPlayer.isPlaying) {
+        isPlaying = exoPlayer.isPlaying
+    }
+
     LaunchedEffect(Unit) {
         viewModel.audioList.forEach {
             val mediaItem = MediaItem.fromUri(it.url)
@@ -89,39 +96,41 @@ fun MusicPlayerScreen(
     }
     exoPlayer.prepare()
 
-    var playing by remember{
-        mutableStateOf(false)
-    }
 
-    var currentPosition by remember {
+    val currentPosition = remember {
         mutableLongStateOf(0)
     }
 
-    var totalDuration by remember {
+    LaunchedEffect(exoPlayer.currentPosition) {
+        currentPosition.longValue = exoPlayer.currentPosition
+    }
+
+    val totalDuration = remember {
         mutableLongStateOf(0)
+    }
+
+    LaunchedEffect(exoPlayer.duration) {
+        if (exoPlayer.duration > 0) {
+            totalDuration.longValue = exoPlayer.duration
+        }
+    }
+
+    var percentReached = currentPosition.longValue.toFloat() / if (totalDuration.longValue > 0) totalDuration.longValue else 0
+    if (percentReached.isNaN()) {
+        percentReached = 0f
     }
 
     val progressSize = remember {
         mutableStateOf(IntSize(0, 0))
     }
 
-    LaunchedEffect(exoPlayer.currentPosition) {
-        currentPosition = exoPlayer.currentPosition
+    var playingIndex by remember {
+        mutableIntStateOf(viewModel.currentPlayingIndex)
     }
 
-    LaunchedEffect(exoPlayer.duration) {
-        if (exoPlayer.duration > 0) {
-            totalDuration = exoPlayer.duration
-        }
-    }
-
-    LaunchedEffect(exoPlayer.isPlaying) {
-        playing = exoPlayer.isPlaying
-    }
-
-    var percentReached = currentPosition.toFloat() / if (totalDuration > 0) totalDuration else 0
-    if (percentReached.isNaN()) {
-        percentReached = 0f
+    LaunchedEffect(exoPlayer.currentMediaItemIndex){
+        playingIndex = exoPlayer.currentMediaItemIndex
+        pagerState.animateScrollToPage(playingIndex, animationSpec = tween(500))
     }
 
     Box(
@@ -167,7 +176,7 @@ fun MusicPlayerScreen(
             }
             Spacer(modifier = Modifier.height(50.dp))
             AnimatedContent(targetState = pagerState, transitionSpec = {
-                (scaleIn() + fadeIn()) with (scaleOut() + fadeOut())
+                (scaleIn() + fadeIn()) togetherWith (scaleOut() + fadeOut())
             }, label = "") {
                 Column(
                     modifier = Modifier
@@ -197,8 +206,7 @@ fun MusicPlayerScreen(
                         detectTapGestures {
                             val xPos = it.x
                             val whereIClicked =
-                                (xPos.toLong() * totalDuration) / progressSize.value.width.toLong()
-//                            viewModel.onUIEvents(UIEvents.SeekTo(whereIClicked.toFloat()))
+                                (xPos.toLong() * totalDuration.longValue) / progressSize.value.width.toLong()
                             exoPlayer.seekTo(whereIClicked)
                         }
                     },
@@ -206,7 +214,7 @@ fun MusicPlayerScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(fraction = if (viewModel.isPlaying) percentReached else 0f)
+                        .fillMaxWidth(fraction = if (isPlaying) percentReached else 0f)
                         .height(6.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(Color.White)
@@ -220,8 +228,8 @@ fun MusicPlayerScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                TextViewNormal(text = convertLongToText(currentPosition))
-                TextViewNormal(text = convertLongToText(totalDuration))
+                TextViewNormal(text = convertLongToText(currentPosition.longValue))
+                TextViewNormal(text = convertLongToText(totalDuration.longValue))
             }
             Spacer(modifier = Modifier.height(48.dp))
             Row(
@@ -237,11 +245,13 @@ fun MusicPlayerScreen(
                     color = Color.Transparent,
                     iconTint = Color.White
                 ) {
-                    viewModel.onUIEvents(UIEvents.Backward)
+                    exoPlayer.seekToPreviousMediaItem()
                 }
                 PlayerIconItem(
-                    modifier = Modifier.size(60.dp).padding(10.dp),
-                    icon = if (viewModel.isPlaying) Icons.Default.Pause
+                    modifier = Modifier
+                        .size(60.dp)
+                        .padding(10.dp),
+                    icon = if (isPlaying) Icons.Default.Pause
                     else Icons.Default.PlayArrow
                 ) {
                     viewModel.onUIEvents(UIEvents.PlayPause)
@@ -252,7 +262,7 @@ fun MusicPlayerScreen(
                     color = Color.Transparent,
                     iconTint = Color.White
                 ) {
-                    viewModel.onUIEvents(UIEvents.Forward)
+                    exoPlayer.seekToNextMediaItem()
                 }
             }
         }

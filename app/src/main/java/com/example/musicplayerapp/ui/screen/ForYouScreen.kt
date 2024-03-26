@@ -100,7 +100,6 @@ fun SongItem(
                 text = song.artist
             )
         }
-
     }
 }
 

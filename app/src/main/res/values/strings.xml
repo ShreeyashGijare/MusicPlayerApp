@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MusicPlayerApp</string>
+    <string name="please_connect_to_internet">Please connect to internet</string>
 </resources>
