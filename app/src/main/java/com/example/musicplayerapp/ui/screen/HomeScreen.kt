@@ -20,6 +20,7 @@ import com.example.musicplayerapp.data.bottomNavigationItem.BottomNavigationItem
 import com.example.musicplayerapp.data.data_models.Data
 import com.example.musicplayerapp.ui.graphs.HomeNavGraph
 import com.example.musicplayerapp.ui.music.MusicViewModel
+import com.example.musicplayerapp.utils.Graph
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -33,7 +34,8 @@ fun HomeScreen(
     isLoading: Boolean,
     exoPlayer: ExoPlayer,
     onSongItemClick: (Int) -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onMediaPlayerClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -55,6 +57,9 @@ fun HomeScreen(
             },
             onStart = {
                 onStart()
+            },
+            onMediaPlayerClick = {
+                navController.navigate(Graph.MUSIC_PLAYER)
             }
         )
     }

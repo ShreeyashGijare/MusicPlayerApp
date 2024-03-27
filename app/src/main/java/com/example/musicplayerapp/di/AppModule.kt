@@ -83,10 +83,10 @@ class AppModule {
         player: ExoPlayer
     ): MusicPlayerServiceHandler = MusicPlayerServiceHandler(player)
 
-    /*@Provides
+    @Provides
     @Singleton
     fun providesConnectivityObserver(
         @ApplicationContext context: Context
-    ): ConnectivityObserver = NetworkConnectivityObserver(context)*/
+    ): ConnectivityObserver = NetworkConnectivityObserver(context)
 
 }

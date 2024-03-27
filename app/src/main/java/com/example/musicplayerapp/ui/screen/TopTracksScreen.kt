@@ -24,7 +24,8 @@ fun TopTracksScreen(
     currentPlayingAudio: Data,
     isLoading: Boolean,
     onSongItemClick: (Int) -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onMediaPlayerClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -51,9 +52,11 @@ fun TopTracksScreen(
             UIState.Ready -> {
                 MediaPlayerController(
                     currentPlayingAudio = currentPlayingAudio,
-                    isAudioPlaying = isAudioPlaying
-                ) {
-                    onStart()
+                    isAudioPlaying = isAudioPlaying,
+                    onStart = {
+                        onStart()
+                    }) {
+                    onMediaPlayerClick()
                 }
             }
         }

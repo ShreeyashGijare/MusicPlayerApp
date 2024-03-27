@@ -115,4 +115,7 @@ dependencies {
 
     //permissions
     implementation ("com.google.accompanist:accompanist-permissions:0.30.0")
+
+    //SplashScreen
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

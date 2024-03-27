@@ -246,6 +246,7 @@ fun MusicPlayerScreen(
                     color = Color.Transparent,
                     iconTint = Color.White
                 ) {
+                    isPlaying = true
                     exoPlayer.seekToPreviousMediaItem()
                 }
                 PlayerIconItem(
@@ -263,6 +264,7 @@ fun MusicPlayerScreen(
                     color = Color.Transparent,
                     iconTint = Color.White
                 ) {
+                    isPlaying = true
                     exoPlayer.seekToNextMediaItem()
                 }
             }

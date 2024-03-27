@@ -26,7 +26,8 @@ fun HomeNavGraph(
     isLoading: Boolean,
     onSongItemClick: (Int) -> Unit,
     exoPlayer: ExoPlayer,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onMediaPlayerClick: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -46,6 +47,9 @@ fun HomeNavGraph(
                 },
                 onStart = {
                     onStart()
+                },
+                onMediaPlayerClick = {
+                    onMediaPlayerClick()
                 }
             )
         }
@@ -62,6 +66,9 @@ fun HomeNavGraph(
                 },
                 onStart = {
                     onStart()
+                },
+                onMediaPlayerClick = {
+                    onMediaPlayerClick()
                 }
             )
         }

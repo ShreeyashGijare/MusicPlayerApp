@@ -22,6 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -47,7 +48,8 @@ val dummyAudio = Data(
 class MusicViewModel @Inject constructor(
     private val musicPlayerServiceHandler: MusicPlayerServiceHandler,
     private val repository: Repository,
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     var duration by savedStateHandle.saveable { mutableLongStateOf(0L) }
@@ -57,14 +59,29 @@ class MusicViewModel @Inject constructor(
     var currentSelectedAudio by savedStateHandle.saveable { mutableStateOf(dummyAudio) }
     var audioList by savedStateHandle.saveable { mutableStateOf(listOf<Data>()) }
     var isLoading by savedStateHandle.saveable { mutableStateOf(true) }
-    var currentPlayingIndex by savedStateHandle.saveable { mutableIntStateOf(3) }
+    var currentPlayingIndex by savedStateHandle.saveable { mutableIntStateOf(1) }
+
 
     private val _uiState: MutableStateFlow<UIState> = MutableStateFlow(UIState.Initial)
     val uiState: StateFlow<UIState> = _uiState
 
-    /*init {
-        loadAudioData()
-    }*/
+    private val _isConnected = MutableStateFlow(false)
+    val isConnected: StateFlow<Boolean> = _isConnected
+
+    private val _isReady = MutableStateFlow(false)
+    val isReady = _isReady.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            delay(3000L)
+            _isReady.value = true
+        }
+    }
+
+    init {
+        isNetworkConnected()
+    }
+
 
     init {
         viewModelScope.launch {
@@ -95,6 +112,9 @@ class MusicViewModel @Inject constructor(
     }
 
     private fun setMediaItems() {
+        currentPlayingIndex = 0
+        currentSelectedAudio = audioList[0]
+
         isLoading = false
         audioList.map { audio ->
             MediaItem.Builder()
@@ -169,6 +189,14 @@ class MusicViewModel @Inject constructor(
             musicPlayerServiceHandler.onPlayerEvents(PlayerEvent.Stop)
         }
         super.onCleared()
+    }
+
+    private fun isNetworkConnected() {
+        viewModelScope.launch {
+            connectivityObserver.observe().collectLatest { it ->
+                _isConnected.value = it == ConnectivityObserver.Status.Available
+            }
+        }
     }
 
 }

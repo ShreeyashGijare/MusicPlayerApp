@@ -1,6 +1,7 @@
 package com.example.musicplayerapp.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,13 +23,17 @@ import com.example.musicplayerapp.utils.AppConstants
 fun MediaPlayerController(
     currentPlayingAudio: Data,
     isAudioPlaying: Boolean,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onMediaPlayerClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(64.dp)
-            .background(Brown),
+            .background(Brown)
+            .clickable {
+                       onMediaPlayerClick()
+            },
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

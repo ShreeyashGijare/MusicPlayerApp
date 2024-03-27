@@ -43,7 +43,8 @@ fun ForYouScreen(
     currentPlayingAudio: Data,
     isLoading: Boolean,
     onSongItemClick: (Int) -> Unit,
-    onStart: () -> Unit
+    onStart: () -> Unit,
+    onMediaPlayerClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -69,9 +70,10 @@ fun ForYouScreen(
             UIState.Ready -> {
                 MediaPlayerController(
                     currentPlayingAudio = currentPlayingAudio,
-                    isAudioPlaying = isAudioPlaying
-                ) {
+                    isAudioPlaying = isAudioPlaying, {
                     onStart()
+                }) {
+                    onMediaPlayerClick()
                 }
             }
         }
