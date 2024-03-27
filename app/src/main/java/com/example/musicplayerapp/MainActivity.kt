@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
 
-        /*installSplashScreen().apply {
+        installSplashScreen().apply {
 
             setKeepOnScreenCondition {
                 !viewModel.isReady.value
@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 zoomX.start()
                 zoomY.start()
             }
-        }*/
+        }
 
         lifecycleScope.launchWhenStarted {
             viewModel.isConnected.collect {
@@ -93,11 +93,6 @@ class MainActivity : ComponentActivity() {
                     },
                     onStart = {
                         viewModel.onUIEvents(UIEvents.PlayPause)
-                    },
-                    onMediaPlayerClick = {
-
-
-
                     }
                 )
             }

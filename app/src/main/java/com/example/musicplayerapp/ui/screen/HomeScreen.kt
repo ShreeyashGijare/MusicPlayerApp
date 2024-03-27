@@ -34,8 +34,7 @@ fun HomeScreen(
     isLoading: Boolean,
     exoPlayer: ExoPlayer,
     onSongItemClick: (Int) -> Unit,
-    onStart: () -> Unit,
-    onMediaPlayerClick: () -> Unit
+    onStart: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
