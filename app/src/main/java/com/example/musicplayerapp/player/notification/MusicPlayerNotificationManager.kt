@@ -69,7 +69,7 @@ class MusicPlayerNotificationManager @Inject constructor(
                     pendingIntent = mediaSession.sessionActivity
                 )
             )
-            .setSmallIconResourceId(R.drawable.ic_launcher_background)
+            .setSmallIconResourceId(R.drawable.logo)
             .build()
             .also {
                 it.setMediaSessionToken(mediaSession.sessionCompatToken)
